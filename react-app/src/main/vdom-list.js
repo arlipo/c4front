@@ -4,7 +4,6 @@ import { createElement as $, useMemo, useState, useLayoutEffect, cloneElement, u
 
 import { map, identityAt, deleted, never } from "./vdom-util.js"
 import { useWidth, useEventListener, useSync } from "./vdom-hooks.js"
-import { getRandomNumber } from "../components/test/MockData.js"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -162,8 +161,6 @@ export function GridCell({ children, rowKey, rowKeyMod, colKey, isExpander, expa
 
 const colKeysOf = children => children.map(c => c.props.colKey)
 
-const formattedString = str => str.trim().toLowerCase()
-
 export function GridCol(props) {
     return []
 }
@@ -262,7 +259,7 @@ const getAllChildren = ({children,rowKeys,cols,draggingStart,hasHiddenCols,hideE
         ...headElements, ...children, ...expandedElements
     ]))])
     console.log("inner render")
-    return hasHiddenCols ? allChildren : allChildren.filter(child=>!formattedString(child.key).includes(formattedString("expand")));
+    return allChildren;
 }
 
 /*,(a,b)=>{    Object.entries(a).filter(([k,v])=>b[k]!==v).forEach(([k,v])=>console.log(k)) */
