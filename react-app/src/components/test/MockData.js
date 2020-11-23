@@ -3,7 +3,6 @@ import { ImageElement } from '../image'
 
 export default function MockData() { }
 
-
 export function ProjectCell() {
     const strs = ["CLDN Export", "DFDS Import", "CLDN Import", "Depot", "Line Equipment"]
     return getRandomText(strs)
@@ -13,8 +12,14 @@ export function StockCell() {
     const strs = ["CLDN RO-RO SA", "DFDS Seaway", "DSV Road A/S"]
     return getRandomText(strs)
 }
+
 export function NumMarkCell() {
     const strs = ["DSV9005", "BV9075", "BTEU3923433", "HAAU2611105", "DSV500225", "COMB2264114", "BTEU3909008", "DSV500236"]
+    return getRandomText(strs)
+}
+
+export function RowsCountCell(count) {
+    const strs = [...Array(count)].map((num,i)=>num=getRandomNumber(++i*getRandomNumber(20,100), ++i*getRandomNumber(100,200)));
     return getRandomText(strs)
 }
 
@@ -38,8 +43,11 @@ export function LocationCell() {
 
 function getRandomText(strs) {
     const index = Math.floor(Math.random() * strs.length)
-
     return <Text value={strs[index]} key="rndText" />
+}
+
+export function getRandomNumber(min,max){
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 export function ByCell() {
@@ -63,10 +71,7 @@ export function ByCell() {
 
         return acc.length > 0 ? [...acc, <Text value=" ● " key={`del${i}`} />, current] : [current]
     }, [])
-
     const row = <div className="descriptionRow " key="row" children={finalElements} />
-
-
     return row
 }
 

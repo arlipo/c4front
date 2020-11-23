@@ -79,9 +79,9 @@ const fitRows = (filters,buttons,outerWidth,expandMode,rowCount) => (
 
 const dMinMax = el => el.props.maxWidth - el.props.minWidth
 
-const em = v => v+'em'
+export const em = v => v+'em'
 
-export function FilterArea({filters,buttons,centerButtonText,className}){
+export function FilterArea({filters,buttons,centerButtonText}){
     const [gridElement,setGridElement] = useState(null)
     const outerWidth = useWidth(gridElement)
     const expandMode = filters && filters.length > 0 ? 2:1
@@ -158,6 +158,7 @@ const prepCheckUpdPopupPos = element => {
         was : pos
     )
 }
+
 const popupParentStyle = {position:"relative"}
 const usePopupPos = element => {
     const [position,setPosition] = useState({})
@@ -182,7 +183,6 @@ const usePopupState = (identity,popupElement) => {
     return [isOpened(popup),setOpened]
 }
 
-
 export function FilterExpander({identity,optButtons}){
     const [popupElement,setPopupElement] = useState(null)
     const [popupStyle,parentStyle] = usePopupPos(popupElement)
@@ -190,7 +190,7 @@ export function FilterExpander({identity,optButtons}){
     const [isOpened,open] = usePopupState(identity,popupElement)
 
     console.log("p-render")
-    return $("div",{className:"filterExpander",style:parentStyle,onClick:ev=>open()},
+    return $("div",{className:"filterExpander",style:parentStyle,onClick:()=>open()},
         isOpened && $("div",{style:{...popupStyle,width},ref:setPopupElement},optButtons)
     )
 }

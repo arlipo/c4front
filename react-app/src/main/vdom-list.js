@@ -4,6 +4,7 @@ import { createElement as $, useMemo, useState, useLayoutEffect, cloneElement, u
 
 import { map, identityAt, deleted, never } from "./vdom-util.js"
 import { useWidth, useEventListener, useSync } from "./vdom-hooks.js"
+import { getRandomNumber } from "../components/test/MockData.js"
 
 const dragRowIdOf = identityAt('dragRow')
 const dragColIdOf = identityAt('dragCol')
@@ -41,6 +42,7 @@ const sortedByHideWill = sortedWith((a, b) => a.props.hideWill - b.props.hideWil
 const calcHiddenCols = (cols, outerWidth) => {
     const [visibleCols, hiddenCols] = partitionVisibleCols(sortedByHideWill(cols), outerWidth)
     const hasHiddenCols = hiddenCols.length > 0
+    //console.log(hasHiddenCols);
     const hiddenColSet = hasHiddenCols && new Set(colKeysOf(hiddenCols))
     const hideElementsForHiddenCols = mode => (
         hasHiddenCols ? (children => children.filter(c => mode === hiddenColSet.has(c.props.colKey))) :
@@ -160,6 +162,8 @@ export function GridCell({ children, rowKey, rowKeyMod, colKey, isExpander, expa
 
 const colKeysOf = children => children.map(c => c.props.colKey)
 
+const formattedString = str => str.trim().toLowerCase()
+
 export function GridCol(props) {
     return []
 }
@@ -173,6 +177,7 @@ const getGridTemplateColumns = columns => columns.map(c => {
 
 const noChildren = []
 export function GridRoot({ identity, rowKeys, cols, children: rawChildren }) {
+    
     const children = rawChildren || noChildren//Children.toArray(rawChildren)
     const [dragData, setDragData] = useState({})
     const { axis, patch: dropPatch } = dragData
@@ -191,7 +196,6 @@ export function GridRoot({ identity, rowKeys, cols, children: rawChildren }) {
             { keys: rowKeys, enqueuePatch: enqueueRowPatch },
         )(axis) : {})
     })
-
     const [expanded, setExpandedItem] = useExpanded()
 
     const hasDragRow = useMemo(()=>children.some(c=>c.props.dragHandle==="x"),[children])
@@ -209,7 +213,6 @@ export function GridRoot({ identity, rowKeys, cols, children: rawChildren }) {
     ), [patchedCols, hideElementsForHiddenCols, hasHiddenCols])
 
     const { toExpanderElements, getExpandedCells } = useExpandedElements(expanded, setExpandedItem)
-
     const allChildren = useMemo(()=>getAllChildren({
         children,rowKeys,cols,draggingStart,hasHiddenCols,hideElementsForHiddenCols,toExpanderElements,getExpandedCells
     }),[children,rowKeys,cols,draggingStart,hasHiddenCols,hideElementsForHiddenCols,toExpanderElements,getExpandedCells])
@@ -220,7 +223,7 @@ export function GridRoot({ identity, rowKeys, cols, children: rawChildren }) {
     }, [setExpandedItem, draggingStart])
 
     const style = { ...rootDragStyle, display: "grid", gridTemplateRows, gridTemplateColumns }
-    return $("div", { onMouseDown, style, className: "grid", ref: setGridElement }, allChildren)
+    return $("div", { onMouseDown, style, className: "grid", ref: setGridElement}, allChildren)
 }
 
 const getAllChildren = ({children,rowKeys,cols,draggingStart,hasHiddenCols,hideElementsForHiddenCols,toExpanderElements,getExpandedCells}) => {
@@ -249,18 +252,17 @@ const getAllChildren = ({children,rowKeys,cols,draggingStart,hasHiddenCols,hideE
                     style: { flexBasis: `${col.props.minWidth}em` },
                     className: "inputLike"
                 },[
-                    $("label", {}, col.props.caption),
-                    $("div", {}, cell.props.children),
+                    $("label", { key: `lbl` }, col.props.caption),
+                    $("div", { key: `div` }, cell.props.children),
                 ])
             ))
         })
     })
-
     const allChildren = toExpanderElements(hasHiddenCols)([...dropElements, ...toDraggingElements(draggingStart)(hideElementsForHiddenCols(false)([
         ...headElements, ...children, ...expandedElements
     ]))])
     console.log("inner render")
-    return allChildren
+    return hasHiddenCols ? allChildren : allChildren.filter(child=>!formattedString(child.key).includes(formattedString("expand")));
 }
 
 /*,(a,b)=>{    Object.entries(a).filter(([k,v])=>b[k]!==v).forEach(([k,v])=>console.log(k)) */
