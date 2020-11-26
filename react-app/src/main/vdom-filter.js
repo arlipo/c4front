@@ -1,5 +1,5 @@
 
-import {createElement as $,useState,useLayoutEffect,useContext,createContext,useCallback,useEffect} from "../main/react-prod.js"
+import {createElement as $,useState,useLayoutEffect,useContext,createContext,useCallback,useEffect} from "react"
 import {useWidth,useEventListener} from "../main/vdom-hooks.js"
 
 //// move to shared
@@ -44,13 +44,15 @@ const doFitFilters = (filters,resTemplate) => {
         if(!groupedFilters) return fallback
         return inner(hideEmptyFromIndex+1,groupedFilters)
     }
-    return inner(0,null)
+    const res = inner(0,null)
+    return res
 }
 
 const centerButtonWidth = 1
 const emPerRow = 2
 
 const fitFilters = (filters,outerWidth,rowCount,canReduceButtonWidth,isMultilineButtons,lt,rt) => {
+    if(filters.length > 0 && rowCount <= 1 && !isMultilineButtons) return null
     const allButtonWidth = lt.width + centerButtonWidth + rt.width
     const fitWidth = isMultilineButtons ? Math.max(0, outerWidth - allButtonWidth) : 0
     if(canReduceButtonWidth && outerWidth < allButtonWidth ) return null
@@ -67,14 +69,14 @@ const fitFilters = (filters,outerWidth,rowCount,canReduceButtonWidth,isMultiline
 
 const getWidthLimits = filters => getVisibleFilters(filters,0).map(c=>c.props.minWidth)
 
-const fitRows = (filters,buttons,outerWidth,expandMode,rowCount) => (
+const fitRows = (filters,buttons,outerWidth,rowCount) => (
     fitFilters(filters, outerWidth, rowCount, true ,false, fitButtonsSide(buttons,"lt",true ,false), fitButtonsSide(buttons,"rt",true ,false)) ||
     fitFilters(filters, outerWidth, rowCount, true ,false, fitButtonsSide(buttons,"lt",true ,false), fitButtonsSide(buttons,"rt",false,false)) ||
     fitFilters(filters, outerWidth, rowCount, true ,false, fitButtonsSide(buttons,"lt",false,false), fitButtonsSide(buttons,"rt",false,false)) ||
     fitFilters(filters, outerWidth, rowCount, true ,true , fitButtonsSide(buttons,"lt",true ,true ), fitButtonsSide(buttons,"rt",true ,true )) ||
     fitFilters(filters, outerWidth, rowCount, true ,true , fitButtonsSide(buttons,"lt",true ,true ), fitButtonsSide(buttons,"rt",false,true )) ||
     fitFilters(filters, outerWidth, rowCount, false,true , fitButtonsSide(buttons,"lt",false,true ), fitButtonsSide(buttons,"rt",false,true )) ||
-    fitRows(filters,buttons,outerWidth,expandMode,rowCount+1)
+    fitRows(filters,buttons,outerWidth,rowCount+1)
 )
 
 const dMinMax = el => el.props.maxWidth - el.props.minWidth
@@ -84,8 +86,7 @@ const em = v => v+'em'
 export function FilterArea({filters,buttons,centerButtonText,className}){
     const [gridElement,setGridElement] = useState(null)
     const outerWidth = useWidth(gridElement)
-    const expandMode = filters && filters.length > 0 ? 2:1
-    const {groupedFilters,lt,rt} = fitRows(filters||[],buttons||[],outerWidth,expandMode,1)
+    const {groupedFilters,lt,rt} = fitRows(filters||[],buttons||[],outerWidth,1)
     const dnRowHeight = groupedFilters && groupedFilters[0] && groupedFilters[0].items.length>0 || lt.optButtons.length + rt.optButtons.length > 0 ? emPerRow : 0
     const yRowToEm = h => em(h * emPerRow*2 - emPerRow + dnRowHeight)
 
@@ -105,7 +106,7 @@ export function FilterArea({filters,buttons,centerButtonText,className}){
     const gridTemplateRows = '[up] '+em(emPerRow)+' [dn] '+em(dnRowHeight)
     const gridTemplateColumns = '[lt-btn] '+em(lt.width)+' [center-btn] '+em(centerButtonWidth)+' [rt-btn] '+em(rt.width)
     const style = { display: "grid", alignContent: "start", justifyContent: "end", gridTemplateRows, gridTemplateColumns, position: "relative", height: yRowToEm(groupedFilters.length) }
-    return $("div",{ style, className: 'filterArea darkPrimaryColor', ref: setGridElement },
+    return $("div",{ style, className:"filterArea", ref: setGridElement },
         $("div",{ key: "up-center-btn", style: { gridRow: "up", gridColumn: 'center-btn', display: "flex", alignItems: "center" } },centerButtonText),
         $("div",{ key: "up-lt-btn", style: { gridRow: "up", gridColumn: 'lt-btn', display: "flex", alignItems: "center", justifyContent: "flex-end" } },lt.buttons),
         $("div",{ key: "up-rt-btn", style: { gridRow: "up", gridColumn: 'rt-btn', display: "flex", alignItems: "center", justifyContent: "flex-start" } },rt.buttons),
@@ -169,7 +170,7 @@ const usePopupPos = element => {
     return [position,popupParentStyle]
 }
 
-export const PopupContext = createContext()
+const PopupContext = createContext()
 const usePopupState = (identity,popupElement) => {
     const [popup,setPopup] = useContext(PopupContext)
     const isOpened = useCallback(p => p===identity, [identity])
@@ -181,16 +182,36 @@ const usePopupState = (identity,popupElement) => {
     useEventListener(doc,"click",checkClose)
     return [isOpened(popup),setOpened]
 }
+export function PopupManager({children}){
+    const [popup,setPopup] = useState(null) // todo useSync
+    return $(PopupContext.Provider,{value:[popup,setPopup]},children)
+}
 
 
-export function FilterExpander({identity,optButtons}){
+const getButtonPlaceStyle = minWidth => ({display:"flex",flexBasis:minWidth+"em",height:"2em"})
+
+export function FilterButtonExpander({identity,optButtons,minWidth,popupItemClassName,children}){
     const [popupElement,setPopupElement] = useState(null)
-    const [popupStyle,parentStyle] = usePopupPos(popupElement)
+    const [popupStyle,popupParentStyle] = usePopupPos(popupElement)
     const width = em(Math.max(...optButtons.map(c=>c.props.minWidth)))
     const [isOpened,open] = usePopupState(identity,popupElement)
+    const parentStyle = {...popupParentStyle,...getButtonPlaceStyle(minWidth)}
 
-    console.log("p-render")
-    return $("div",{className:"filterExpander",style:parentStyle,onClick:ev=>open()},
-        isOpened && $("div",{style:{...popupStyle,width},ref:setPopupElement},optButtons)
+    console.log("p-render-")
+    return $("div",{style:parentStyle,onClick:ev=>open()},
+        children,
+        isOpened && $("div",{style:{...popupStyle,width},ref:setPopupElement},optButtons.map(btn=>{
+            return $("div",{ key: btn.key, className: popupItemClassName }, btn.props.children)
+        }))
     )
 }
+
+export function FilterButtonPlace({minWidth,children}){
+    return $("div",{style:getButtonPlaceStyle(minWidth)},children)
+}
+
+export function FilterItem({className,children}){
+    return $("div",{className},children)
+}
+
+export const components = {FilterArea,FilterButtonExpander,FilterButtonPlace,FilterItem,PopupManager}
