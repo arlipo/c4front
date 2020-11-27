@@ -69,7 +69,7 @@ div[data-expander="passive"] {
 .tableHeadContainer {
     font-weight: bold;
     vertical-align: middle;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .tableCellContainer {
@@ -213,17 +213,8 @@ div[data-row-key] {
 
 .filterArea {
     width: 100vw;
-    //max-width: 1935px;
     position: fixed;
-    // width: fit-content;
 }
-
-/*@media (max-width: 1000px) {
-    .filterArea {
-        min-width: 100vw;
-        width: fit-content;
-    }
-}*/
 
 .filterArea button {
     border: medium none;

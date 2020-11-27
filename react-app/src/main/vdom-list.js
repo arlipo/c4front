@@ -259,9 +259,6 @@ const getAllChildren = ({children,rowKeys,cols,draggingStart,hasHiddenCols,hideE
         ...headElements, ...children, ...expandedElements
     ]))])
     console.log("inner render")
-    //window.onresize = ()=> document.body.style.overflowX = "hidden";
-    document.addEventListener("resize", ()=> {document.body.style.overflowX = "hidden";});
-    document.addEventListener("scroll", ()=> {document.body.style.overflowX = "hidden";});
     return allChildren;
 }
 
