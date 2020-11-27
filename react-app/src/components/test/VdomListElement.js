@@ -38,7 +38,7 @@ export default function VdomListElement({style}) {
     const exCell = rowKey => col =>
         $(GridCell, {
             key: ":" + rowKey + col.key, rowKey, colKey: col.props.colKey,
-            ...(col.props.colKey === "drag" ? { isRowDragHandle: true, style: { userSelect: "none", cursor: "pointer" } } : {}),
+            ...(col.props.colKey === "drag" ? { /*isRowDragHandle: true,*/ style: { userSelect: "none", cursor: "pointer" } } : {}),
             ...(col.props.colKey === "expand" ? { isExpander: true } : {}),
             children: [
                 col.props.colKey === "expand" ? getExpanderElement() :

@@ -1,5 +1,5 @@
 import React from 'react'
-import { FilterArea, FilterExpander, PopupContext } from '../../main/vdom-filter.js'
+import { FilterArea, PopupContext, FilterButtonExpander } from '../../main/vdom-filter.js'
 import InputElement from '../input'
 import ButtonElement from '../button'
 
@@ -49,7 +49,7 @@ export default function VdomFiltersElement() {
                 $(FilterItem, { key: 5, value: "From", minWidth: 3, maxWidth: 10, canHide }),
             ],
             buttons: [
-                $(FilterExpander, {
+                $(FilterButtonExpander, {
                     key: 0, minWidth: 2, area: "lt", identity: identities.lt, optButtons: [
                         $(FilterButton, { key: 3, minWidth: 4 }),
                         $(FilterButton, { key: 2, minWidth: 4 }),
@@ -58,7 +58,7 @@ export default function VdomFiltersElement() {
                 $(FilterButton, { key: 1, minWidth: 2, area: "lt" }),
                 $(FilterButton, { key: 2, minWidth: 2, area: "rt" }),
                 $(FilterButton, { key: 3, minWidth: 2, area: "rt" }),
-                $(FilterExpander, {
+                $(FilterButtonExpander, {
                     key: 4, minWidth: 2, area: "rt", identity: identities.rt, optButtons: [
                         $(FilterButton, { key: 7, minWidth: 4 }),
                         $(FilterButton, { key: 6, minWidth: 4 }),

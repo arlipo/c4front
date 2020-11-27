@@ -170,7 +170,7 @@ const usePopupPos = element => {
     return [position,popupParentStyle]
 }
 
-const PopupContext = createContext()
+export const PopupContext = createContext()
 const usePopupState = (identity,popupElement) => {
     const [popup,setPopup] = useContext(PopupContext)
     const isOpened = useCallback(p => p===identity, [identity])
@@ -214,4 +214,4 @@ export function FilterItem({className,children}){
     return $("div",{className},children)
 }
 
-export const components = {FilterArea,FilterButtonExpander,FilterButtonPlace,FilterItem,PopupManager}
+export const components = {FilterArea,FilterButtonExpander,FilterButtonPlace,FilterItem,PopupManager, PopupContext}

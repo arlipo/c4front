@@ -159,6 +159,10 @@ export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, isExpa
 
 const colKeysOf = children => children.map(c => c.colKey)
 
+export function GridCol(props){
+    return []
+}
+
 const getGidTemplateRows = rows => rows.map(o => `[${getGridRow(o)}] auto`).join(" ")
 const getGridTemplateColumns = columns => columns.map(col => {
     const key = getGridCol(col)
@@ -394,4 +398,4 @@ export function Highlighter({attrName}) {
 
 ///
 
-export const components = {GridCell,GridRoot,Highlighter}
+export const components = {GridCell,GridRoot,Highlighter, GridCol}
