@@ -35,6 +35,7 @@ body {
     font-family: helvetica;
     background: var(--color-body);
     color: var(--textColor-body);
+    overflow-x: hidden;
     //margin: auto !important;
 }
 
@@ -62,13 +63,13 @@ div[data-expander="expanded"] {
 
 div[data-expander="passive"] {
     visibility: hidden;
-    position: absolute;
+    position: fixed;
 }
 
 .tableHeadContainer {
     font-weight: bold;
     vertical-align: middle;
-    overflow: visible;
+    overflow: hidden;
 }
 
 .tableCellContainer {
@@ -211,8 +212,18 @@ div[data-row-key] {
 }
 
 .filterArea {
-    min-width: 100vw;
+    width: 100vw;
+    //max-width: 1935px;
+    position: fixed;
+    // width: fit-content;
 }
+
+/*@media (max-width: 1000px) {
+    .filterArea {
+        min-width: 100vw;
+        width: fit-content;
+    }
+}*/
 
 .filterArea button {
     border: medium none;

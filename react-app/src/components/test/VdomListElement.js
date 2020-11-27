@@ -4,7 +4,7 @@ import { ImageElement } from '../image';
 import { GridRoot, GridCell, GridCol, Highlighter } from "../../main/vdom-list.js";
 import { createSyncProviders } from '../../main/vdom-hooks';
 import { Text, ByCell, ProjectCell, StockCell, NumMarkCell, LocationCell } from "./MockData.js";
-export const rowKeys = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].map(k => "r" + k)
+export const rowKeys = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,20,21,22,23,24,25,26,27,28,29,30].map(k => "r" + k)
 export default function VdomListElement() {
     const [state, setState] = useState({ enableColDrag: false })
 
@@ -19,19 +19,19 @@ export default function VdomListElement() {
     })
 
     const cols = [
-        exCol("c0", 1, 20, 30, "By"),
-        exCol("expand", 0, 1.5, 5, "Expand"),
-        exCol("c1", 1, 10, 15, "Project"),
-        exCol("c2", 2, 10, 15, "Stock"),
-        exCol("c3", 2, 5, 5, "Cargo"),
-        exCol("c4", 3, 5, 5, "By"),
-        exCol("c5", 3, 5, 5, "Out"),
-        exCol("c6", 2, 5, 5, "Remains"),
-        exCol("c7", 2, 5, 5, "In"),
-        exCol("c8", 2, 5, 6, "Container"),
-        exCol("c9", 1, 10, 15, "Number/Marking"),
-        exCol("c10", 1, 7, 10, "Location"),
-        exCol("drag", 0, 1.5, 8)
+        exCol("c0", 1, 21, 240, "By"),
+        exCol("expand", 0, 1.5, 40, "Expand"),
+        exCol("c1", 1, 10, 120, "Project"),
+        exCol("c2", 2, 10, 120, "Stock"),
+        exCol("c3", 2, 5, 40, "Cargo"),
+        exCol("c4", 3, 5, 40, "By"),
+        exCol("c5", 3, 5, 40, "Out"),
+        exCol("c6", 2, 5, 40, "Remains"),
+        exCol("c7", 2, 5, 40, "In"),
+        exCol("c8", 2, 5, 48, "Container"),
+        exCol("c9", 1, 10, 120, "Number/Marking"),
+        exCol("c10", 1, 7, 80, "Location"),
+        exCol("drag", 0, 2.5, 40)
     ];
     
     const exCell = rowKey => col =>
@@ -39,7 +39,7 @@ export default function VdomListElement() {
             key: ":" + rowKey + col.key, rowKey, colKey: col.props.colKey,
             ...(col.props.colKey === "drag" ? { /*isRowDragHandle: true,*/ style: { userSelect: "none", cursor: "pointer" } } : {}),
             ...(col.props.colKey === "expand" ? { isExpander: true } : {}),
-            ...(col.props.colKey === "c8" ? { style: { paddingRight: "20px" } } : {}),
+            ...(col.props.colKey === "c8" ? { style: { paddingRight: "3vw" } } : {}),
             children: [
                 col.props.colKey === "expand" ? getExpanderElement() :
                     col.props.colKey === "drag" ? getDragElement() :

@@ -219,7 +219,7 @@ export function GridRoot({ identity, rowKeys, cols, children: rawChildren }) {
         if (axis === "y") setExpandedItem(dragKey, v => false)
     }, [setExpandedItem, draggingStart])
 
-    const style = { ...rootDragStyle, display: "grid", gridTemplateRows, gridTemplateColumns }
+    const style = { ...rootDragStyle, display: "grid", minWidth: "100vw", gridTemplateRows, gridTemplateColumns }
     return $("div", { onMouseDown, style, className: "grid", ref: setGridElement}, allChildren)
 }
 
@@ -259,6 +259,9 @@ const getAllChildren = ({children,rowKeys,cols,draggingStart,hasHiddenCols,hideE
         ...headElements, ...children, ...expandedElements
     ]))])
     console.log("inner render")
+    //window.onresize = ()=> document.body.style.overflowX = "hidden";
+    document.addEventListener("resize", ()=> {document.body.style.overflowX = "hidden";});
+    document.addEventListener("scroll", ()=> {document.body.style.overflowX = "hidden";});
     return allChildren;
 }
 
