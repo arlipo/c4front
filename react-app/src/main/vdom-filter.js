@@ -1,6 +1,7 @@
 
-import {createElement as $,useState,useLayoutEffect,useContext,createContext,useCallback,useEffect} from "../main/react-prod.js"
+import {createElement as $,useState,useLayoutEffect,useContext,createContext,useCallback,useEffect, useRef} from "../main/react-prod.js"
 import {useWidth,useEventListener} from "../main/vdom-hooks.js"
+import { refs } from "./vdom-list.js"
 
 //// move to shared
 
@@ -101,9 +102,9 @@ export function FilterArea({filters,buttons,centerButtonText}){
             boxSizing: "border-box",
         }},item))
     })
-
     const gridTemplateRows = '[up] '+em(emPerRow)+' [dn] '+em(dnRowHeight)
     const gridTemplateColumns = '[lt-btn] '+em(lt.width)+' [center-btn] '+em(centerButtonWidth)+' [rt-btn] '+em(rt.width)
+    refs.filterArea = gridElement;
     const style = { display: "grid", alignContent: "start", justifyContent: "end", gridTemplateRows, gridTemplateColumns, position: "relative", height: yRowToEm(groupedFilters.length) }
     return $("div",{ style, className: 'filterArea darkPrimaryColor', ref: setGridElement },
         $("div",{ key: "up-center-btn", style: { gridRow: "up", gridColumn: 'center-btn', display: "flex", alignItems: "center" } },centerButtonText),
