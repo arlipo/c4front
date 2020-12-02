@@ -1,6 +1,5 @@
-"use strict";
 import { useState, useEffect, createElement, useRef } from '../main/react-prod'
-import { globalRegistry, checkActivateCalls } from './utils.js'
+import { globalRegistry } from './utils.js'
 
 
 const initViewBox = "0 0 0 0"
@@ -14,7 +13,6 @@ const clear = (url) => url.replace(/#.*$/, "")
 
 const SVGElement = ({ url, ...props }) => {
     const ref = useRef(null)
-    const savedCallback = useRef()
     const [state, setState] = useState({ viewBox: initViewBox, color: "black", content: "" })
 
 
@@ -78,11 +76,8 @@ const ImageElement = ({ src, forceSrcWithoutPrefix, title, className, rotate, co
         return $(SVGElement, { url: __src, className: _className, style, color, viewPort })
     }
     else {
-        return $("img", { src: _src, title, className: _className, style: style, ...props })
+        return $("img", { src: _src, title, className: _className, style, ...props })
     }
 }
-
-
-
 
 export { ImageElement, SVGElement, adaptiveTag }

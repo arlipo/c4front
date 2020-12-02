@@ -1,6 +1,7 @@
 
-import {createElement as $,useState,useLayoutEffect,useContext,createContext,useCallback,useEffect} from "../main/react-prod.js"
+import {createElement as $,useState,useLayoutEffect,useContext,createContext,useCallback,useEffect, useRef} from "../main/react-prod.js"
 import {useWidth,useEventListener} from "../main/vdom-hooks.js"
+import { refs } from "./vdom-list.js"
 
 //// move to shared
 
@@ -79,9 +80,9 @@ const fitRows = (filters,buttons,outerWidth,expandMode,rowCount) => (
 
 const dMinMax = el => el.props.maxWidth - el.props.minWidth
 
-const em = v => v+'em'
+export const em = v => v+'em'
 
-export function FilterArea({filters,buttons,centerButtonText,className}){
+export function FilterArea({filters,buttons,centerButtonText}){
     const [gridElement,setGridElement] = useState(null)
     const outerWidth = useWidth(gridElement)
     const expandMode = filters && filters.length > 0 ? 2:1
@@ -101,9 +102,9 @@ export function FilterArea({filters,buttons,centerButtonText,className}){
             boxSizing: "border-box",
         }},item))
     })
-
     const gridTemplateRows = '[up] '+em(emPerRow)+' [dn] '+em(dnRowHeight)
     const gridTemplateColumns = '[lt-btn] '+em(lt.width)+' [center-btn] '+em(centerButtonWidth)+' [rt-btn] '+em(rt.width)
+    refs.filterArea = gridElement;
     const style = { display: "grid", alignContent: "start", justifyContent: "end", gridTemplateRows, gridTemplateColumns, position: "relative", height: yRowToEm(groupedFilters.length) }
     return $("div",{ style, className: 'filterArea darkPrimaryColor', ref: setGridElement },
         $("div",{ key: "up-center-btn", style: { gridRow: "up", gridColumn: 'center-btn', display: "flex", alignItems: "center" } },centerButtonText),
@@ -158,6 +159,7 @@ const prepCheckUpdPopupPos = element => {
         was : pos
     )
 }
+
 const popupParentStyle = {position:"relative"}
 const usePopupPos = element => {
     const [position,setPosition] = useState({})
@@ -182,7 +184,6 @@ const usePopupState = (identity,popupElement) => {
     return [isOpened(popup),setOpened]
 }
 
-
 export function FilterExpander({identity,optButtons}){
     const [popupElement,setPopupElement] = useState(null)
     const [popupStyle,parentStyle] = usePopupPos(popupElement)
@@ -190,7 +191,7 @@ export function FilterExpander({identity,optButtons}){
     const [isOpened,open] = usePopupState(identity,popupElement)
 
     console.log("p-render")
-    return $("div",{className:"filterExpander",style:parentStyle,onClick:ev=>open()},
+    return $("div",{className:"filterExpander",style:parentStyle,onClick:()=>open()},
         isOpened && $("div",{style:{...popupStyle,width},ref:setPopupElement},optButtons)
     )
 }

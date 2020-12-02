@@ -1,8 +1,11 @@
+@import "reset";
+
 :root {
     --secondary-color: rgb(225, 225, 225);
-    --light-secondaryColor: hsl(0, 0%,63.3333%);
-    --color-body: hsl(0, 0%,100%);
-    --textColor-body: hsl(0, 0%,12.9412%);
+    --light-secondaryColor: hsl(0, 0%, 63.3333%);
+    --color-body: hsl(0, 0%, 100%);
+    --textColor-body: hsl(0, 0%, 12.9412%);
+    --color-filterButton: #E3CF8E;
 }
 
 img {
@@ -32,24 +35,35 @@ body {
     font-family: helvetica;
     background: var(--color-body);
     color: var(--textColor-body);
+    overflow-x: hidden;
+    //margin: auto !important;
 }
 
 div[data-expander="expanded"] {
-    > div > .expanderElement {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+
+    >div>.expanderElement {
         transform: rotate(180deg);
     }
 }
 
-div[data-expander="collapsed"] {
+.expanderElementContainer {
+    margin: 0.2em;
+    align-self: center;
+}
+
+.expanderElement {
+    display: block;
+    min-height: 1.2em;
+    cursor: pointer;
+    margin: 0.2em auto;
+    align-self: center;
 }
 
 div[data-expander="passive"] {
     visibility: hidden;
-}
-
-div.grid {
-    /* border-collapse:collapse;*/
-    border-spacing: 0;
+    position: fixed;
 }
 
 .tableHeadContainer {
@@ -67,17 +81,11 @@ div.grid {
     text-overflow: ellipsis;
     display: flex;
     align-items: center;
-    img, svg {
+
+    img,
+    svg {
         margin: auto !important;
     }
-}
-
-.headerColor-border {
-    border-color: var(--secondary-color);
-}
-
-.headerColor {
-    background-color: var(--secondary-color);
 }
 
 .expanderElement {
@@ -105,7 +113,8 @@ div.grid {
     width: auto;
     position: relative;
     align-self: center;
-    > label {
+
+    >label {
         font-size: 0.8em;
         text-transform: none;
         white-space: nowrap;
@@ -125,6 +134,7 @@ div.grid {
     box-sizing: border-box;
     position: relative;
     border: 0.05em solid var(--secondary-color);
+
     &:hover {
         border-color: var(--light-secondaryColor);
     }
@@ -136,6 +146,7 @@ div.grid {
     min-height: 100%;
     display: flex;
     position: relative;
+
     input {
         margin: 0rem;
         vertical-align: top;
@@ -156,6 +167,7 @@ div.grid {
         min-width: 0;
     }
 }
+
 // body {
 //     transform: skewY(45deg);
 // }
@@ -179,12 +191,29 @@ button {
     white-space: nowrap;
     outline: currentcolor none medium;
     outline-offset: -0.1em;
+
     &:hover {
         opacity: 0.8;
     }
+
     >.text {
         padding: 0 1em;
     }
+}
+
+div.grid {
+    /* border-collapse:collapse;*/
+    border-spacing: 0;
+    min-width: 100vw;
+}
+
+div[data-row-key] {
+    text-align: center;
+}
+
+.filterArea {
+    width: 100vw;
+    position: fixed;
 }
 
 .filterArea button {
@@ -220,9 +249,26 @@ button {
     font-weight: normal !important;
 }
 
+.headerColor-border {
+    border-color: var(--secondary-color);
+}
+
+.headerColor {
+    background-color: var(--secondary-color);
+}
+
+.primaryColor {
+    background-color: rgb(229, 208, 137);
+    color: rgb(255, 255, 255);
+}
+
 .darkPrimaryColor {
     background-color: rgb(176, 162, 116);
     color: rgb(255, 255, 255);
+}
+
+.lightPrimaryColor {
+    background-color: rgb(175, 143, 38);
 }
 
 .greenColor {
@@ -237,11 +283,13 @@ button {
 
 .redColor {
     background-color: rgb(255, 0, 0);
-    color: rgb(255, 255, 255);    
+    color: rgb(255, 255, 255);
 }
+
 
 .test {
     background-color: red;
+
     &:after {
         content: " after";
     }

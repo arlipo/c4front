@@ -1,6 +1,7 @@
-import React, { useContext, createContext, useState } from 'react'
+import React, { useContext, createContext, useState } from 'react';
+import { getRandomNumber } from '../components/test/MockData';
 
-const HighlightContext = createContext()
+const HighlightContext = createContext();
 
 export function useHighlight() { return useContext(HighlightContext) }
 

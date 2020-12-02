@@ -111,8 +111,8 @@ export function useScroll() {
 */
 
 const eventManager = (()=>{
-	let w
-    const checkForEvent = (event) => typeof event === "function"
+	let w;
+    const checkForEvent = (event) => typeof event === "function";
     const getHostNoFailure = (location) => {
         try{
              location.host()
@@ -130,7 +130,8 @@ const eventManager = (()=>{
             _w = _w.parent
         }
 		return _w
-	}
+  }
+  
 	const create = el=>(type,params) => {
 		const doc =  (el.ownerDocument || el.documentElement.ownerDocument)
 		w = getParentW(doc.defaultView)
@@ -139,85 +140,87 @@ const eventManager = (()=>{
 			case "click": if(checkForEvent(w.MouseEvent)) return (new w.MouseEvent(type,params)); break
       case "mousedown": if(checkForEvent(w.MouseEvent)) return (new w.MouseEvent(type,params)); break
       default: break			
-		}						
+		}					
 		const _params = params && (params.code === "vk" && type === "keydown")?{...params,detail:params}:params //ie11 hack
 		return (new w.CustomEvent(type,_params))
-	}	
-	const sendToWindow = (event)=> w.dispatchEvent(event)
+  }
+  
+  const sendToWindow = (event)=> w.dispatchEvent(event)
+  
 	return {create,sendToWindow}
 })()
 
 const textSelectionMonitor = event =>{	
-    const getSelection = w => w.document.getSelection()
-    const elem = event.target
-    const w = elem && elem.ownerDocument && elem.ownerDocument.defaultView		        
-    const selection = getSelection(w)
-    return selection.toString().length>0 && (!selection.anchorNode || elem.hasChildNodes(selection.anchorNode))	
+    const getSelection = w => w.document.getSelection();
+    const elem = event.target;
+    const w = elem && elem.ownerDocument && elem.ownerDocument.defaultView	;	        
+    const selection = getSelection(w);
+    return selection.toString().length>0 && (!selection.anchorNode || elem.hasChildNodes(selection.anchorNode));
 }
 const branches = (()=>{
-    let main =""
+    let main ="";
     const store = (o)=>{
         if(!o.length) return
         main = o.split(/[,;]/)[0]
-    }
-    const get = () => main
+    };
+    const get = () => main;
     const isSibling = (o) => {
-        if(!o) return false
-        if(main.length===0) return false
-        return main !== o.branchKey
+        if(!o) return false;
+        if(main.length===0) return false;
+        return main !== o.branchKey;
     }
-    return {store, get, isSibling}
+    return {store, get, isSibling};
 })()
 const checkActivateCalls=(()=>{
-	const callbacks=[]
-	const add = (c) => callbacks.push(c)
+	const callbacks=[];
+	const add = (c) => callbacks.push(c);
 	const remove = (c) => {
-		const index = callbacks.indexOf(c)
-		if(index>=0) callbacks.splice(index,1)
+		const index = callbacks.indexOf(c);
+		if(index>=0) callbacks.splice(index,1);
 	}
-	const check = (modify) => callbacks.forEach(c=>c(modify))	
-	return {add,remove,check}
+	const check = (modify) => callbacks.forEach(c=>c(modify));
+	return {add,remove,check};
 })()
 const resizeListener = (() =>{
-    const delay = 500
-    const callbacks = []
-    let wait
-    let init
+    const delay = 500;
+    const callbacks = [];
+    let wait;
+    let init;
     const onResize = (e) =>{
-        const w= e.target.ownerDocument? e.target.ownerDocument.defaultView: e.target
-        if(wait) wait = w.clearTimeout(wait)
+        const w= e.target.ownerDocument? e.target.ownerDocument.defaultView: e.target;
+        if(wait) wait = w.clearTimeout(wait);
         wait = w.setTimeout(()=>{
-            callbacks.forEach(c=>c())
-            wait = null
+            callbacks.forEach(c=>c());
+            wait = null;
         },delay)	
     }
     const reg = (o,el)=>{
         if(!init){
-            const w = el.ownerDocument.defaultView
-            w.addEventListener("resize",onResize)
-            init = true
+            const w = el.ownerDocument.defaultView;
+            w.addEventListener("resize",onResize);
+            init = true;
         }
-        callbacks.push(o)
+        callbacks.push(o);
         const unreg=()=>{
-            const index = callbacks.indexOf(o)
-            if(index>=0) callbacks.splice(index,1)
-            return null	
+            const index = callbacks.indexOf(o);
+            if(index>=0) callbacks.splice(index,1);
+            return null;
         }
-        return {unreg}
+        return {unreg};
     }    
-    return {reg}
+    return {reg};
 })()
 
 const receivers = (()=>{
-    let _rcv = {}
-    const add = (o)=> _rcv = {..._rcv, ...o}              
-    const get = () => _rcv
-    return {add, get}
+    let _rcv = {};
+    const add = (o)=> _rcv = {..._rcv, ...o};              
+    const get = () => _rcv;
+    return {add, get};
 })()
 const globalRegistry = (()=>{
-    let _registry = {}
-    const add = (o) => _registry = {..._registry, ...o}
-    const get = () => _registry
-    return {add, get}
+    let _registry = {};
+    const add = (o) => _registry = {..._registry, ...o};
+    const get = () => _registry;
+    return {add, get};
 })()
-export {eventManager,checkActivateCalls, resizeListener, textSelectionMonitor,branches, receivers, globalRegistry}
+export {eventManager,checkActivateCalls, resizeListener, textSelectionMonitor,branches, receivers, globalRegistry};
