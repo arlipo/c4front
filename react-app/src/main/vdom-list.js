@@ -1,6 +1,6 @@
 
 
-import { createElement as $, useMemo, useState, useLayoutEffect, cloneElement, useCallback, useEffect } from "react"
+import { createElement as $, useMemo, useState, useLayoutEffect, cloneElement, useCallback, useEffect, useRef } from "react"
 
 import { map, identityAt, deleted, never } from "./vdom-util.js"
 import { useWidth, useEventListener, useSync, NoCaptionContext } from "./vdom-hooks.js"
@@ -15,6 +15,7 @@ const ROW_KEYS = {
 
 const GRID_CLASS_NAMES = {
     CELL: "tableCellContainer headerColor-border",
+    HEADER: "tableHeadContainer headerColor",
 }
 
 //// col hiding
@@ -27,7 +28,7 @@ const partitionVisibleCols = (cols, outerWidth) => {
     const fit = (count, accWidth) => {
         const col = cols[count]
         if (!col) return count
-        const willWidth = accWidth + col.minWidth
+        const willWidth = accWidth + col.props.minWidth
         if (outerWidth < willWidth) return count
         return fit(count + 1, willWidth)
     }
@@ -35,14 +36,14 @@ const partitionVisibleCols = (cols, outerWidth) => {
     return [cols.slice(0, count), cols.slice(count)]
 }
 
-const sortedByHideWill = sortedWith((a, b) => a.hideWill - b.hideWill)
+const sortedByHideWill = sortedWith((a, b) => a.props.hideWill - b.props.hideWill)
 
 const calcHiddenCols = (cols, outerWidth) => {
     const [visibleCols, hiddenCols] = partitionVisibleCols(sortedByHideWill(cols), outerWidth)
     const hasHiddenCols = hiddenCols.length > 0
     const hiddenColSet = hasHiddenCols && new Set(colKeysOf(hiddenCols))
-    const hideElementsForHiddenCols = (mode,toColKey) => (
-        hasHiddenCols ? (children => children.filter(c => mode === hiddenColSet.has(toColKey(c)))) :
+    const hideElementsForHiddenCols = mode => (
+        hasHiddenCols ? (children => children.filter(c => mode === hiddenColSet.has(c.props.colKey))) :
             mode ? (children => []) : (children => children)
     )
     return { hasHiddenCols, hideElementsForHiddenCols }
@@ -75,7 +76,7 @@ const useExpandedElements = (expanded, setExpandedItem) => {
         )
         return rowKeys.filter(rowKey => expanded[rowKey]).map(rowKey => {
             const pairs = cols.map(col => {
-                const cell = expandedByPos[posStr(rowKey, col.colKey)]
+                const cell = expandedByPos[posStr(rowKey, col.props.colKey)]
                 return [col, cell]
             })
             return [rowKey, pairs]
@@ -88,7 +89,7 @@ const expandRowKeys = expanded => rowKeys => rowKeys.flatMap(rowKey => (
     expanded[rowKey] ? [{ rowKey }, { rowKey, rowKeyMod: "-expanded" }] : [{ rowKey }]
 ))
 
-const hideExpander = hasHiddenCols => hasHiddenCols ? (l => l) : (l => l.filter(c => !c.isExpander))
+const hideExpander = hasHiddenCols => hasHiddenCols ? (l => l) : (l => l.filter(c => !c.props.isExpander))
 
 //// drag model
 /*
@@ -137,7 +138,7 @@ const useSortRoot = (identity, keys, transientPatch) => {
 }
 
 const remapCols = cols => {
-    const colByKey = Object.fromEntries(cols.map(c => [c.colKey, c]))
+    const colByKey = Object.fromEntries(cols.map(c => [c.props.colKey, c]))
     return colKeys => colKeys.map(k => colByKey[k])
 }
 
@@ -148,16 +149,45 @@ const getGridCol = ({ colKey }) => CSS.escape(colKey)
 
 const spanAll = "1 / -1"
 
-export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, isExpander, expander, dragHandle, noDefCellClass, className: argClassName, gridRow: argGridRow, gridColumn: argGridColumn, ...props }) {
+export let refs = {}
+const setHeaderWidth = maxTableWidth => {
+    const filterArea = refs.filterArea
+    const lastHead = refs.lastHead.current
+    if (Object.keys(lastHead).length && Object.keys(filterArea).length) {
+        const potentialWidth = lastHead.offsetLeft + lastHead.offsetWidth
+        if (potentialWidth > 391) {
+            filterArea.style.maxWidth = potentialWidth+"px"
+            filterArea.style.minWidth = ""
+        }
+        else{
+            filterArea.style.minWidth = "100vw"
+        }
+        if (document.body.clientWidth > potentialWidth && document.body.clientWidth < maxTableWidth) {
+            filterArea.style.minWidth = "100vw"
+            filterArea.style.maxWidth = ""
+        }
+        else{
+            filterArea.style.maxWidth = maxTableWidth+"px"
+        }
+    }
+}
+
+export function GridCell({ identity, children, rowKey, rowKeyMod, colKey, isExpander, expander, dragHandle, noDefCellClass, className: argClassName, gridRow: argGridRow, gridColumn: argGridColumn, isLastHead, maxTableWidth, ...props }) {
     const gridRow = argGridRow || getGridRow({ rowKey, rowKeyMod })
     const gridColumn = argGridColumn || getGridCol({ colKey })
     const style = { ...props.style, gridRow, gridColumn }
     const expanderProps = isExpander ? { 'data-expander': expander || 'passive' } : {}
     const className = noDefCellClass ? argClassName : `${argClassName} ${GRID_CLASS_NAMES.CELL}`
-    return $("div", { ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, style, className }, children)
+    const lastColumnRef = useRef({})
+    refs.lastHead = {}
+    if (isLastHead) {
+        refs.lastHead = lastColumnRef
+        setHeaderWidth(maxTableWidth)
+    }
+    return $("div", { ref: isLastHead ? lastColumnRef: null, ...props, ...expanderProps, 'data-col-key': colKey, 'data-row-key': rowKey, "data-drag-handle": dragHandle, style, className }, children)
 }
 
-const colKeysOf = children => children.map(c => c.colKey)
+const colKeysOf = children => children.map(c => c.props.colKey)
 
 export function GridCol(props){
     return []
@@ -165,13 +195,13 @@ export function GridCol(props){
 
 const getGidTemplateRows = rows => rows.map(o => `[${getGridRow(o)}] auto`).join(" ")
 const getGridTemplateColumns = columns => columns.map(col => {
-    const key = getGridCol(col)
-    const width = `minmax(${col.minWidth}em,${col.maxWidth}em)`
+    const key = getGridCol(col.props)
+    const width = `minmax(${col.props.minWidth}em,${col.props.maxWidth}em)`
     return `[${key}] ${width}`
 }).join(" ")
 
 const noChildren = []
-export function GridRoot({ identity, rowKeys, cols, children: rawChildren }) {
+export function GridRoot({ identity, rowKeys, cols, children: rawChildren, maxTableWidth }) {
     const children = rawChildren || noChildren//Children.toArray(rawChildren)
     const [dragData, setDragData] = useState({})
     const { axis, patch: dropPatch } = dragData
@@ -204,14 +234,14 @@ export function GridRoot({ identity, rowKeys, cols, children: rawChildren }) {
     const { hasHiddenCols, hideElementsForHiddenCols } =
         useMemo(() => calcHiddenCols(cols, outerWidth), [cols, outerWidth])
     const gridTemplateColumns = useMemo(() => getGridTemplateColumns(
-        hideExpander(hasHiddenCols)(hideElementsForHiddenCols(false,col=>col.colKey)(patchedCols))
+        hideExpander(hasHiddenCols)(hideElementsForHiddenCols(false)(patchedCols))
     ), [patchedCols, hideElementsForHiddenCols, hasHiddenCols])
 
     const { toExpanderElements, getExpandedCells } = useExpandedElements(expanded, setExpandedItem)
 
     const allChildren = useMemo(()=>getAllChildren({
-        children,rowKeys,cols,draggingStart,hasHiddenCols,hideElementsForHiddenCols,toExpanderElements,getExpandedCells
-    }),[children,rowKeys,cols,draggingStart,hasHiddenCols,hideElementsForHiddenCols,toExpanderElements,getExpandedCells])
+        children,rowKeys,cols,draggingStart,hasHiddenCols,hideElementsForHiddenCols,toExpanderElements,getExpandedCells, maxTableWidth
+    }),[children,rowKeys,cols,draggingStart,hasHiddenCols,hideElementsForHiddenCols,toExpanderElements,getExpandedCells, maxTableWidth])
 
     useEffect(() => {
         const { dragKey, axis } = draggingStart
@@ -220,14 +250,24 @@ export function GridRoot({ identity, rowKeys, cols, children: rawChildren }) {
 
     const style = { ...rootDragStyle, display: "grid", gridTemplateRows, gridTemplateColumns }
     const res = $("div", { onMouseDown, style, className: "grid", ref: setGridElement }, allChildren)
-    return $(NoCaptionContext.Provider,{value:true},res)
+    return $(NoCaptionContext.Provider,{value:true, key:"captionContext1"},res)
 }
 
-const getAllChildren = ({children,rowKeys,cols,draggingStart,hasHiddenCols,hideElementsForHiddenCols,toExpanderElements,getExpandedCells}) => {
+const getAllChildren = ({children,rowKeys,cols,draggingStart,hasHiddenCols,hideElementsForHiddenCols,toExpanderElements,getExpandedCells, maxTableWidth}) => {
+    const headElements = map((col,i,arr) => {
+        const rowKey = ROW_KEYS.HEAD
+        const colKey = col.props.colKey
+        const key = rowKey + colKey
+        const className = GRID_CLASS_NAMES.HEADER
+        let isLastHead = false
+        if (i===arr.length-1) {
+            isLastHead = true
+        }
+        return $(GridCell, { key, rowKey, colKey, className, isLastHead, maxTableWidth}, col.props.caption)
+    })(hideExpander(hasHiddenCols)(cols))
     const dropElements = getDropElements(draggingStart)
-
     const expandedElements = getExpandedCells({
-        rowKeys, children, cols: hideElementsForHiddenCols(true,col=>col.colKey)(cols),
+        rowKeys, children, cols: hideElementsForHiddenCols(true)(cols),
     }).map(([rowKey, pairs]) => {
         const res = $(GridCell, {
             key: `${rowKey}-expanded`,
@@ -237,15 +277,15 @@ const getAllChildren = ({children,rowKeys,cols,draggingStart,hasHiddenCols,hideE
             style: { display: "flex", flexFlow: "row wrap" },
             children: pairs.map(([col, cell]) => $("div",{
                 key: cell.key,
-                style: { flexBasis: `${col.minWidth}em` },
+                style: { flexBasis: `${col.props.minWidth}em` },
                 className: "inputLike",
                 children: cell.props.children,
             }))
         })
-        return $(NoCaptionContext.Provider,{value:false},res)
+        return $(NoCaptionContext.Provider,{value:false, key:"captionContext2"},res)
     })
-    const allChildren = toExpanderElements(hasHiddenCols)([...dropElements, ...toDraggingElements(draggingStart)(hideElementsForHiddenCols(false,cell=>cell.props.colKey)([
-        ...children, ...expandedElements
+    const allChildren = toExpanderElements(hasHiddenCols)([...dropElements, ...toDraggingElements(draggingStart)(hideElementsForHiddenCols(false)([
+        ...headElements, ...children, ...expandedElements
     ]))])
     console.log("inner render")
     return allChildren

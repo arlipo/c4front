@@ -19,7 +19,7 @@ export default function HighlightProvider({ children }) {
 
     return (
         <HighlightContext.Provider value={setStyle}>
-            <style dangerouslySetInnerHTML={{ __html: newRowStyle + newColStyle }} />
+            <style dangerouslySetInnerHTML={{ __html: newRowStyle + newColStyle }}/>
             {children}
         </HighlightContext.Provider>
     )

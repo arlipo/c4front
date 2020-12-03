@@ -14,14 +14,13 @@ const clear = (url) => url.replace(/#.*$/, "")
 
 const SVGElement = ({ url, ...props }) => {
     const ref = useRef(null)
-    const savedCallback = useRef()
     const [state, setState] = useState({ viewBox: initViewBox, color: "black", content: "" })
 
 
     useEffect(() => {
         function replaceSvgTag(str) {
             return str.replace(/<\/?svg(.|\n)*?>/g, "")
-        }
+    }
 
         function getViewBox(str) {
             const reg = /viewBox=["'](.+?)["']/
@@ -38,13 +37,14 @@ const SVGElement = ({ url, ...props }) => {
                 .then(r => r.text())
                 .then(r => {
                     const viewBox = getViewBox(r)
-                    setState(was => { return { ...was, viewBox, content: replaceSvgTag(r) } })
+                    ref.current && setState(was => { return { ...was, viewBox, content: replaceSvgTag(r) } })
                 })
         }
     }, [url])
 
     useEffect(() => {
         if (!ref.current) return
+
         const win = ref.current.ownerDocument.defaultView
         const color = !props.color || props.color == "adaptive" ? win.getComputedStyle(ref.current).color : props.color
         const { x, y, width, height } = ref.current.getBBox()

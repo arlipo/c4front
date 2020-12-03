@@ -1,8 +1,10 @@
+@import "reset";
+
 :root {
     --secondary-color: rgb(225, 225, 225);
-    --light-secondaryColor: hsl(0, 0%,63.3333%);
-    --color-body: hsl(0, 0%,100%);
-    --textColor-body: hsl(0, 0%,12.9412%);
+    --light-secondaryColor: hsl(0, 0%, 63.3333%);
+    --color-body: hsl(0, 0%, 100%);
+    --textColor-body: hsl(0, 0%, 12.9412%);
 }
 
 img {
@@ -16,6 +18,16 @@ img {
 .rowIconSize {
     height: 2em;
     width: 2em;
+}
+
+.filterButtonIcon {
+    height: 1.3em;
+    width: 1.3em;
+}
+
+.hideFilterIcon {
+    height: 1.2em;
+    width: 1.2em;
 }
 
 .textLineSize {
@@ -35,16 +47,16 @@ body {
 }
 
 div[data-expander="expanded"] {
-    > div > .expanderElement {
+    >div>.expanderElement {
         transform: rotate(180deg);
     }
 }
 
-div[data-expander="collapsed"] {
-}
+div[data-expander="collapsed"] {}
 
 div[data-expander="passive"] {
     visibility: hidden;
+    position: fixed;
 }
 
 div.grid {
@@ -67,7 +79,9 @@ div.grid {
     text-overflow: ellipsis;
     display: flex;
     align-items: center;
-    img, svg {
+
+    img,
+    svg {
         margin: auto !important;
     }
 }
@@ -105,7 +119,8 @@ div.grid {
     width: auto;
     position: relative;
     align-self: center;
-    > label {
+
+    >label {
         font-size: 0.8em;
         text-transform: none;
         white-space: nowrap;
@@ -125,6 +140,7 @@ div.grid {
     box-sizing: border-box;
     position: relative;
     border: 0.05em solid var(--secondary-color);
+
     &:hover {
         border-color: var(--light-secondaryColor);
     }
@@ -136,6 +152,7 @@ div.grid {
     min-height: 100%;
     display: flex;
     position: relative;
+
     input {
         margin: 0rem;
         vertical-align: top;
@@ -156,6 +173,7 @@ div.grid {
         min-width: 0;
     }
 }
+
 // body {
 //     transform: skewY(45deg);
 // }
@@ -179,9 +197,11 @@ button {
     white-space: nowrap;
     outline: currentcolor none medium;
     outline-offset: -0.1em;
+
     &:hover {
         opacity: 0.8;
     }
+
     >.text {
         padding: 0 1em;
     }
@@ -220,9 +240,18 @@ button {
     font-weight: normal !important;
 }
 
+.primaryColor {
+    background-color: #e5d089;
+    color: white;
+}
+
 .darkPrimaryColor {
     background-color: rgb(176, 162, 116);
     color: rgb(255, 255, 255);
+}
+
+.lightPrimaryColor {
+    background-color: #af8f26;
 }
 
 .greenColor {
@@ -237,11 +266,12 @@ button {
 
 .redColor {
     background-color: rgb(255, 0, 0);
-    color: rgb(255, 255, 255);    
+    color: rgb(255, 255, 255);
 }
 
 .test {
     background-color: red;
+
     &:after {
         content: " after";
     }
