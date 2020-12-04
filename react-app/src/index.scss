@@ -44,6 +44,7 @@ body {
     font-family: helvetica;
     background: var(--color-body);
     color: var(--textColor-body);
+    overflow-x: hidden;
 }
 
 div[data-expander="expanded"] {
