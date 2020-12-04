@@ -6,8 +6,8 @@ import HighlightProvider from '../../providers/HighlightProvider'
 import MockData, { Text, ByCell, ProjectCell, StockCell, NumMarkCell, LocationCell } from "./MockData.js"
 
 const { createElement: $, useState } = React
-
-export default function VdomListElement({style}) {
+export const rowKeys = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].map(k => "r" + k)
+export default function VdomListElement() {
     const [state, setState] = useState({ enableColDrag: false })
 
     const { enableColDrag } = state
@@ -21,8 +21,8 @@ export default function VdomListElement({style}) {
     })
 
     const cols = [
-        exCol("c0", 1, 20, 30, "By"),
-        exCol("expand", 0, 2, 2),
+        exCol("c0", 1, 21, 30, "By"),
+        exCol("expand", 0, 2, 5),
         exCol("c1", 1, 10, 15, "Project"),
         exCol("c2", 2, 10, 15, "Stock"),
         exCol("c3", 2, 5, 5, "Cargo"),
@@ -30,15 +30,15 @@ export default function VdomListElement({style}) {
         exCol("c5", 3, 5, 5, "Out"),
         exCol("c6", 2, 5, 5, "Remains"),
         exCol("c7", 2, 5, 5, "In"),
-        exCol("c8", 1, 3, 3),
+        exCol("c8", 2, 5, 6, "Container"),
         exCol("c9", 1, 10, 15, "Number/Marking"),
         exCol("c10", 1, 7, 10, "Location"),
-        exCol("drag", 0, 1.5, 1.5),
+        exCol("drag", 0, 2, 5)
     ]
     const exCell = rowKey => col =>
         $(GridCell, {
             key: ":" + rowKey + col.key, rowKey, colKey: col.props.colKey,
-            ...(col.props.colKey === "drag" ? { isRowDragHandle: true, style: { userSelect: "none", cursor: "pointer" } } : {}),
+            ...(col.props.colKey === "drag" ? { /*isRowDragHandle: true,*/ style: { userSelect: "none", cursor: "pointer" } } : {}),
             ...(col.props.colKey === "expand" ? { isExpander: true } : {}),
             children: [
                 col.props.colKey === "expand" ? getExpanderElement() :
@@ -65,14 +65,14 @@ export default function VdomListElement({style}) {
     function getDragElement() {
         return <ImageElement color="#90929F" className="dragElement" src='/icons/drag.svg' key="dropElem"/>
     }
-
-    const rowKeys = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].map(k => "r" + k)
+    const maxTableWidth = cols.filter(head=>head.key!==":expand").reduce((acc,head)=>acc + head.props.maxWidth, 0)*16
     const listEl = $(GridRoot, {
         key: "list",
         identity:  {},
         cols,
         children: rowKeys.flatMap(rowKey => cols.map(exCell(rowKey))),
-        rowKeys
+        rowKeys,
+        maxTableWidth
     })
     const children = [
         listEl,

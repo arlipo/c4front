@@ -1,7 +1,10 @@
 import React from 'react'
-import { FilterArea, FilterExpander, PopupContext } from '../../main/vdom-filter.js'
+import { FilterArea, PopupContext, FilterButtonExpander, em } from '../../main/vdom-filter.js'
 import InputElement from '../input'
 import ButtonElement from '../button'
+import { Text } from './MockData.js'
+import { rowKeys } from './VdomListElement.js'
+import { ImageElement } from '../image.js'
 
 const { createElement: $, useState, useMemo } = React
 
@@ -9,9 +12,9 @@ export default function VdomFiltersElement() {
 
 
 
-    function FilterButton({ minWidth, optButtons }) {
-        // return <ButtonElement style={{ display: "flex", flexBasis: minWidth + "em" }} caption="Button"/>
-        return $("div", { style: { display: "flex", flexBasis: minWidth + "em", border: "1px solid blue" } }, "B")
+    function FilterButton({ flexBasis, content, BGcolor, onClick, minWidth }) { 
+        return <ButtonElement style={{ display: "flex", flexBasis: em(flexBasis), minWidth: em(minWidth)  }} clickHandler={onClick && onClick} caption={content} BGcolor={BGcolor || "primary"}/>
+        //return $("div", { style: { display: "flex", flexBasis: minWidth + "em", border: "1px solid blue" } }, "B");
     }
     function FilterItem({ nonEmpty, value }) {
 
@@ -24,8 +27,8 @@ export default function VdomFiltersElement() {
         )
     }
 
-    function ModeButton({ setState, dataKey }) {
-        return $("button", { onClick: ev => setState(was => ({ ...was, [dataKey]: !was[dataKey] })) }, dataKey)
+    function ModeButton({ setState, dataKey, minWidth, content, area }) {
+        return $(FilterButton, { key: dataKey, minWidth, content, area, onClick: () => setState(was => ({ ...was, [dataKey]: !was[dataKey] })) }, dataKey)
     }
 
 
@@ -36,37 +39,27 @@ export default function VdomFiltersElement() {
     const identities = useMemo(() => ({ lt: {}, rt: {} }), [])
 
     return $(PopupContext.Provider, { value: [popup, setPopup] },
-        $(ModeButton, { key: "showAll", setState, dataKey: "showAll" }),
-        $(ModeButton, { key: "noFilters", setState, dataKey: "noFilters" }),
-        $("div", { style: { height: "10em" } }, "BEFORE"),
+        $("div", { style: { height: "5em" } }, "BEFORE"),
         $(FilterArea, {
             key: "app",
             filters: noFilters ? [] : [
-                $(FilterItem, { key: 1, value: "Number/Marking", minWidth: 7, maxWidth: 10, canHide }),
-                $(FilterItem, { key: 2, value: "Location", minWidth: 5, maxWidth: 10, }),
-                $(FilterItem, { key: 3, value: "Location Feature", minWidth: 8, maxWidth: 10, }),
-                $(FilterItem, { key: 4, value: "Mode", minWidth: 3, maxWidth: 10, }),
+                $(FilterItem, { key: 1, value: "Number/Marking", minWidth: 7, maxWidth: 10 }),
+                $(FilterItem, { key: 2, value: "Location", minWidth: 5, maxWidth: 10 }),
+                $(FilterItem, { key: 3, value: "Location Feature", minWidth: 8, maxWidth: 10, canHide }),
+                $(FilterItem, { key: 4, value: "Mode", minWidth: 3, maxWidth: 10 }),
                 $(FilterItem, { key: 5, value: "From", minWidth: 3, maxWidth: 10, canHide }),
             ],
             buttons: [
-                $(FilterExpander, {
+                $(FilterButtonExpander, {
                     key: 0, minWidth: 2, area: "lt", identity: identities.lt, optButtons: [
-                        $(FilterButton, { key: 3, minWidth: 4 }),
-                        $(FilterButton, { key: 2, minWidth: 4 }),
+                        $(ModeButton, { key: "noFilters", setState, dataKey: "noFilters", flexBasis: 4, minWidth: 2, content:  <ImageElement src="/icons/hidefilters.svg" className="hideFilterIcon" key="hideFiltersImage" color="#ffffff"/>}),
+                        $(FilterButton, { key: 6, flexBasis: 4, minWidth: 15, BGcolor: "lightPrimary", content: <Text value={"XML (Only for dev, by AKU)"} key="t1"></Text>}),
                     ]
                 }),
-                $(FilterButton, { key: 1, minWidth: 2, area: "lt" }),
-                $(FilterButton, { key: 2, minWidth: 2, area: "rt" }),
-                $(FilterButton, { key: 3, minWidth: 2, area: "rt" }),
-                $(FilterExpander, {
-                    key: 4, minWidth: 2, area: "rt", identity: identities.rt, optButtons: [
-                        $(FilterButton, { key: 7, minWidth: 4 }),
-                        $(FilterButton, { key: 6, minWidth: 4 }),
-                        $(FilterButton, { key: 5, minWidth: 4 }),
-                    ]
-                }),
+                $(FilterButton, { key: 1, flexBasis: 2, area: "lt", minWidth: 6, content: <Text value={"Rows"} key="t1"></Text> }),
+                $(FilterButton, { key: 2, flexBasis: 2, area: "lt", minWidth: 4, BGcolor: "green", content: <Text value={rowKeys.length} key="t2"></Text> }),
+                $(ModeButton, { key: "showAll", setState, dataKey: "showAll", flexBasis: 2, minWidth: 2, area: "lt", content: <ImageElement src="/icons/filterbutton.svg" className="filterButtonIcon" key="filterbuttonFiltersImage" color="#ffffff"/> })
             ],
-            centerButtonText: "of",
         })
     )
 
